@@ -2,3 +2,5 @@ streamlit
 transformers
 torch
 accelerate
+elevenlabs
+python-dotenv
