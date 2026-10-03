@@ -49,8 +49,8 @@ Mood: {mood}
 Length: {length}
 
 RULES:
+- Start with just the story, no preamble or explanations.
 - Every sentence, narration, dialogue, and the final rhyme must be entirely in {language}.
-- Do not use English words unless they are character names: {child_name}, Pipkin, Gari, etc.
 - Keep all character names and roles consistent; never rename or merge characters.
 - Begin with {child_name} discovering the adventure.
 - Include {favorite_animal} and {favorite_character} naturally.
@@ -58,12 +58,15 @@ RULES:
 - Create a simple, peaceful, imaginative adventure.
 - No violence, fear, frightening scenes, or mature themes.
 - End with {child_name} feeling safe, cozy, and peaceful.
+- Do not use emojis 
+
 
 ENDING:
 - End with EXACTLY 4 short rhyming lines expressing the story's lesson.
 - Do not label the rhyme.
 - Do not write "The End".
 - Do not add explanations, questions, or anything after the story.
+- Nothing should be outside the story; do not add any commentary or extra text.
 
 OUTPUT:
 Return ONLY the bedtime story.
@@ -74,11 +77,17 @@ No HTML, Markdown, XML, code fences, or formatting tags.
         prompt,
         return_tensors="pt"
     )
-
+    if length == "short":
+        max_new_tokens = 400
+    elif length == "medium":
+        max_new_tokens = 800
+    else:  # long
+        max_new_tokens = 1000
+        
     with torch.no_grad():
         outputs = model.generate(
         **inputs,
-        max_new_tokens=500,
+        max_new_tokens=max_new_tokens,
         do_sample=True,
         temperature=0.8,
         top_p=0.9,
