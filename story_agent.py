@@ -38,37 +38,36 @@ def generate_story(
     """
 
     prompt = f"""
-You are DreamTales, a gentle bedtime-story writer.
+You are DreamTales, a gentle bedtime-story writer. Write the ENTIRE story in {language}.
 
-Create a warm, imaginative and age-appropriate bedtime story for a
-{age}-year-old child.
-
-Child's name: {child_name}
-Favorite animal: {favorite_animal}
-Favorite character: {favorite_character}
+Child: {child_name} (a human child)
+Age: {age}
+Favorite animal: {favorite_animal} (separate companion)
+Favorite character: {favorite_character} (separate character)
 Setting: {setting}
 Mood: {mood}
 Length: {length}
 
-Requirements:
-- The main character, {child_name}, is a HUMAN CHILD.
-- Never describe {child_name} as an animal.
-- The favorite animal must be a SEPARATE companion character.
-- If the favorite animal is a cat, create a separate cat companion with its own name.
-- The favorite character type must also remain separate from the child unless explicitly requested.
-- Make the setting important to the adventure.
-- Keep the story warm, playful, imaginative, and age-appropriate.
-- Avoid violence, frightening scenes, and mature themes.
-- End with a calm, comforting bedtime moment.
-- Finish with a short 2–4 line rhyming moral that is easy for a child to remember.
-- The rhyme should relate naturally to the lesson of the story.
-- Return only the story and the final rhyme. Do not explain your choices.
-LANGUAGE:
-- Write the entire story in {language}.
-- Use natural, child-friendly language.
-- Do not translate word-for-word from English.
-- Keep names of characters unchanged.
-Begin the story.
+RULES:
+- Every sentence, narration, dialogue, and the final rhyme must be entirely in {language}.
+- Do not use English words unless they are character names: {child_name}, Pipkin, Gari, etc.
+- Keep all character names and roles consistent; never rename or merge characters.
+- Begin with {child_name} discovering the adventure.
+- Include {favorite_animal} and {favorite_character} naturally.
+- Make {setting} important to the story.
+- Create a simple, peaceful, imaginative adventure.
+- No violence, fear, frightening scenes, or mature themes.
+- End with {child_name} feeling safe, cozy, and peaceful.
+
+ENDING:
+- End with EXACTLY 4 short rhyming lines expressing the story's lesson.
+- Do not label the rhyme.
+- Do not write "The End".
+- Do not add explanations, questions, or anything after the story.
+
+OUTPUT:
+Return ONLY the bedtime story.
+No HTML, Markdown, XML, code fences, or formatting tags.
 """
 
     inputs = tokenizer(
