@@ -1,24 +1,32 @@
 import streamlit as st
 import time
+import re
 from html import escape
-from story_agent import generate_story 
+from story_agent import generate_story
+
+
+def sanitize_story(text: str) -> str:
+    """Remove HTML/fenced-markup from model output before rendering."""
+    if not text:
+        return ""
+
+    text = re.sub(r'<[^>]+>', '', text)
+    text = re.sub(r'^.*```.*$', '', text, flags=re.M)
+    text = text.replace('`', '')
+    text = re.sub(r'\n\s*\n+', '\n\n', text)
+    return text.strip()
+
+
 header_left, header_right = st.columns([7, 3])
 
-with header_right:
-    language = st.segmented_control(
-        "Language",
-        ["EN", "हिंदी", "اردو"],
-        default="EN",
-        label_visibility="collapsed",
-        selection_mode="single",
-    )
+if "story_generated" not in st.session_state:
+    st.session_state.story_generated = False
 
-    if language == "EN":
-        st.session_state.language = "English"
-    elif language == "हिंदी":
-        st.session_state.language = "Hindi"
-    elif language == "اردو":
-        st.session_state.language = "Urdu"
+if "story" not in st.session_state:
+    st.session_state.story = ""
+
+if "language" not in st.session_state:
+    st.session_state.language = "English"
 
 with header_left:
     st.markdown(
@@ -38,34 +46,9 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed"
 )
-lang_col1, lang_col2 = st.columns([8, 2])
 
-with lang_col2:
-    languages = ["English", "हिंदी", "اردو"]
 
-    # Normalize old/English language names to the displayed names
-    language_map = {
-        "English": "English",
-        "Hindi": "हिंदी",
-        "हिंदी": "हिंदी",
-        "Urdu": "اردو",
-        "اردو": "اردو",
-    }
-
-    current_language = language_map.get(
-        st.session_state.get("language", "English"),
-        "English"
-    )
-
-    language = st.selectbox(
-        "Language",
-        languages,
-        index=languages.index(current_language),
-        label_visibility="collapsed"
-    )
-
-    st.session_state.language = language
-
+    
 # -----------------------------
 # CUSTOM STYLING
 # -----------------------------
@@ -420,6 +403,9 @@ if "setting" not in st.session_state:
 if "mood" not in st.session_state:
     st.session_state.mood = ""
 
+if "selected_language" not in st.session_state:
+    st.session_state.selected_language = "English"
+
 # -----------------------------
 # NIGHT SKY
 # -----------------------------
@@ -594,10 +580,6 @@ if not st.session_state.story_generated:
         else:
             safe_mood = escape(mood)
 
-        # -----------------------------
-        # BEAUTIFUL GENERATION SCREEN
-        # -----------------------------
-
         st.markdown("""
         <div class="generating">
             <div class="generating-moon">🌙</div>
@@ -612,30 +594,29 @@ if not st.session_state.story_generated:
 
         st.session_state.child_name = child_name.strip()
         st.session_state.age = age
-        st.session_state.animal = animal
-        st.session_state.character = character
-        st.session_state.setting = (
-            custom_setting.strip()
-            if setting == "✨ Somewhere else"
-            else setting
-        )
-        st.session_state.mood = (
-            custom_mood.strip()
-            if mood == "✨ Something else"
-            else mood
-        )
+        st.session_state.favorite_animal = animal
+        st.session_state.favorite_character = character
+        st.session_state.setting = setting
+        st.session_state.mood = mood
+        st.session_state.story_length = length
+        st.session_state.language = "English"
+        st.session_state.selected_language = "English"
+
         story = generate_story(
-            child_name=child_name.strip(),
-            age=age,
-            favorite_animal=animal,
-            favorite_character=character,
-            setting=custom_setting.strip() if setting == "✨ Somewhere else" else setting,
-            mood=custom_mood.strip() if mood == "✨ Something else" else mood,
-            length=length,
+            child_name=st.session_state.child_name,
+            age=st.session_state.age,
+            favorite_animal=st.session_state.favorite_animal,
+            favorite_character=st.session_state.favorite_character,
+            setting=st.session_state.setting,
+            mood=st.session_state.mood,
+            length=st.session_state.story_length,
             language=st.session_state.language
         )
 
-        # Convert the generated text into paragraphs
+        story = sanitize_story(story)
+        st.session_state.story = story
+        st.session_state.story_generated = True
+
         paragraphs = [
             paragraph.strip()
             for paragraph in story.split("\n")
@@ -645,9 +626,7 @@ if not st.session_state.story_generated:
         story_html = ""
 
         for i, paragraph in enumerate(paragraphs):
-
             safe_paragraph = escape(paragraph)
-
             if i == 0:
                 story_html += (
                     f'<p><span class="dropcap">'
@@ -658,11 +637,9 @@ if not st.session_state.story_generated:
                 story_html += f"<p>{safe_paragraph}</p>"
 
         st.session_state.story = story_html
-
-        st.session_state.story_generated = True
         st.session_state.story_name = safe_name
         st.session_state.story_length = length
-        
+
         time.sleep(0.5)
         st.rerun()
 
@@ -693,7 +670,6 @@ else:
 
     st.write("")
 
-    # Storybook
     st.markdown(
         f"""
         <div class="storybook">
@@ -703,10 +679,6 @@ else:
         """,
         unsafe_allow_html=True
     )
-
-    # -----------------------------
-    # NARRATION
-    # -----------------------------
 
     st.markdown(
         '<div class="section-title">🎧 Listen to the story</div>',
@@ -728,7 +700,7 @@ else:
         ],
         label_visibility="collapsed"
     )
-    
+
     st.button("▶ Play Story")
 
     st.markdown(
