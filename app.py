@@ -2,7 +2,8 @@ import streamlit as st
 import time
 import re
 from html import escape
-from story_agent import generate_story
+from story_agent import generate_story 
+from narration import generate_narration
 
 
 def sanitize_story(text: str) -> str:
@@ -701,7 +702,27 @@ else:
         label_visibility="collapsed"
     )
 
-    st.button("▶ Play Story")
+    if st.button("▶ Play Story"):
+
+        with st.spinner("Creating your bedtime narration..."):
+
+            try:
+                audio = generate_narration(
+                    st.session_state.story,
+                    voice
+                )
+
+                st.session_state.audio = audio
+
+            except Exception as e:
+                st.error(f"Could not create narration: {e}")
+
+
+    if "audio" in st.session_state:
+        st.audio(
+            st.session_state.audio,
+            format="audio/mp3"
+        )
 
     st.markdown(
         '<div class="footer">✨ Every night can be a new little dream.</div>',
