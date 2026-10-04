@@ -26,7 +26,7 @@ import os
 from huggingface_hub import InferenceClient
 
 MODEL_NAME = os.getenv("GEMMA_MODEL", "google/gemma-3-27b-it")
-PROVIDER = os.getenv("HF_PROVIDER", "nebius")  # or "scaleway"
+PROVIDER = os.getenv("HF_PROVIDER", "auto")  # or "scaleway"
 HF_TOKEN = os.getenv("HF_TOKEN")
 
 client = InferenceClient(provider=PROVIDER, api_key=HF_TOKEN)
