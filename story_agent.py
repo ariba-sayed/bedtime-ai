@@ -27,7 +27,7 @@ from huggingface_hub import InferenceClient
 
 MODEL_NAME = os.getenv(
     "GEMMA_MODEL",
-    "google/gemma-3-1b-it"
+    "google/gemma-2-2b-it"
 )
 
 HF_TOKEN = os.getenv("HF_TOKEN")
