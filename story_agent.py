@@ -1,27 +1,58 @@
 import os
+from urllib import response
 
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
-# You can change this later without changing the rest of the app.
+    # You can change this later without changing the rest of the app.
+    #MODEL_NAME = os.getenv(
+    #    "GEMMA_MODEL",
+    #    "google/gemma-3-1b-it"
+   # )
+
+
+   # print(f"Loading Gemma model: {MODEL_NAME}")
+
+   # tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+
+   # model = AutoModelForCausalLM.from_pretrained(
+  #      MODEL_NAME,
+   #     torch_dtype=torch.float32
+   # )
+
+    #model.eval()
+import os
+from huggingface_hub import InferenceClient
+
 MODEL_NAME = os.getenv(
     "GEMMA_MODEL",
     "google/gemma-3-1b-it"
 )
 
+HF_TOKEN = os.getenv("HF_TOKEN")
 
-print(f"Loading Gemma model: {MODEL_NAME}")
-
-tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-
-model = AutoModelForCausalLM.from_pretrained(
-    MODEL_NAME,
-    torch_dtype=torch.float32
+client = InferenceClient(
+    model=MODEL_NAME,
+    token=HF_TOKEN
 )
 
-model.eval()
+print(f"Using Gemma model: {MODEL_NAME}")
 
+
+def generate_story(prompt):
+    response = client.chat_completion(
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        max_tokens=1000,
+        temperature=0.8,
+    )
+
+    return response.choices[0].message.content
 
 def generate_story(
     child_name,
@@ -73,34 +104,46 @@ Return ONLY the bedtime story.
 No HTML, Markdown, XML, code fences, or formatting tags.
 """
 
-    inputs = tokenizer(
-        prompt,
-        return_tensors="pt"
-    )
-    if length == "short":
-        max_new_tokens = 400
-    elif length == "medium":
-        max_new_tokens = 800
-    else:  # long
-        max_new_tokens = 1000
+    # inputs = tokenizer(
+    #     prompt,
+    #     return_tensors="pt"
+    # )
+    # if length == "short":
+    #     max_new_tokens = 400
+    # elif length == "medium":
+    #     max_new_tokens = 800
+    # else:  # long
+    #     max_new_tokens = 1000
         
-    with torch.no_grad():
-        outputs = model.generate(
-        **inputs,
-        max_new_tokens=max_new_tokens,
-        do_sample=True,
-        temperature=0.8,
-        top_p=0.9,
-        repetition_penalty=1.15,
-        no_repeat_ngram_size=4,
-    )
+    # with torch.no_grad():
+    #     outputs = model.generate(
+    #     **inputs,
+    #     max_new_tokens=max_new_tokens,
+    #     do_sample=True,
+    #     temperature=0.8,
+    #     top_p=0.9,
+    #     repetition_penalty=1.15,
+    #     no_repeat_ngram_size=4,
+    # )
 
-    generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
+    # generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
 
-    story = tokenizer.decode(
-        generated_tokens,
-        skip_special_tokens=True
-    )
+    # story = tokenizer.decode(
+    #     generated_tokens,
+    #     skip_special_tokens=True
+    # )
+    response = client.chat_completion(
+    messages=[
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ],
+    max_tokens=max_new_tokens,
+    temperature=0.8,
+    top_p=0.9
+)
 
+    story = response.choices[0].message.content
     return story.strip()
 
