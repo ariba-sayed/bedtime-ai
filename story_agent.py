@@ -25,34 +25,16 @@ from urllib import response
 import os
 from huggingface_hub import InferenceClient
 
-MODEL_NAME = os.getenv(
-    "GEMMA_MODEL",
-    "google/gemma-2-2b-it"
-)
-
+MODEL_NAME = os.getenv("GEMMA_MODEL", "google/gemma-3-27b-it")
+PROVIDER = os.getenv("HF_PROVIDER", "nebius")  # or "scaleway"
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-client = InferenceClient(
-    model=MODEL_NAME,
-    token=HF_TOKEN
-)
+client = InferenceClient(provider=PROVIDER, api_key=HF_TOKEN)
 
-print(f"Using Gemma model: {MODEL_NAME}")
+print(f"Using Gemma model: {MODEL_NAME} via {PROVIDER}")
 
+MAX_TOKENS = {"short": 400, "medium": 800, "long": 1000}
 
-def generate_story(prompt):
-    response = client.chat_completion(
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ],
-        max_tokens=1000,
-        temperature=0.8,
-    )
-
-    return response.choices[0].message.content
 
 def generate_story(
     child_name,
@@ -62,11 +44,9 @@ def generate_story(
     setting,
     mood,
     length,
-    language
+    language,
 ):
-    """
-    Generate a personalized bedtime story using Gemma.
-    """
+    """Generate a personalized bedtime story using Gemma."""
 
     prompt = f"""
 You are DreamTales, a gentle bedtime-story writer. Write the ENTIRE story in {language}.
@@ -89,8 +69,7 @@ RULES:
 - Create a simple, peaceful, imaginative adventure.
 - No violence, fear, frightening scenes, or mature themes.
 - End with {child_name} feeling safe, cozy, and peaceful.
-- Do not use emojis 
-
+- Do not use emojis.
 
 ENDING:
 - End with EXACTLY 4 short rhyming lines expressing the story's lesson.
@@ -104,46 +83,13 @@ Return ONLY the bedtime story.
 No HTML, Markdown, XML, code fences, or formatting tags.
 """
 
-    # inputs = tokenizer(
-    #     prompt,
-    #     return_tensors="pt"
-    # )
-    if length == "short":
-        max_new_tokens = 400
-    elif length == "medium":
-        max_new_tokens = 800
-    else:  # long
-        max_new_tokens = 1000
-        
-    # with torch.no_grad():
-    #     outputs = model.generate(
-    #     **inputs,
-    #     max_new_tokens=max_new_tokens,
-    #     do_sample=True,
-    #     temperature=0.8,
-    #     top_p=0.9,
-    #     repetition_penalty=1.15,
-    #     no_repeat_ngram_size=4,
-    # )
-
-    # generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
-
-    # story = tokenizer.decode(
-    #     generated_tokens,
-    #     skip_special_tokens=True
-    # )
     response = client.chat_completion(
-    messages=[
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ],
-    max_tokens=max_new_tokens,
-    temperature=0.8,
-    top_p=0.9
-)
+        model=MODEL_NAME,
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=MAX_TOKENS.get(length, 1000),
+        temperature=0.8,
+        top_p=0.9,
+        frequency_penalty=0.3,  # replaces repetition_penalty from the local version
+    )
 
-    story = response.choices[0].message.content
-    return story.strip()
-
+    return response.choices[0].message.content.strip()
