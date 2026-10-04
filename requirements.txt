@@ -5,3 +5,4 @@ accelerate
 elevenlabs
 python-dotenv
 huggingface_hub
+torchvision
