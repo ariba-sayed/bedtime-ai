@@ -2,6 +2,8 @@
 
 DreamTales is a personalized AI bedtime-story companion that creates gentle, imaginative stories based on a child's preferences.
 
+Built for the Hacktoberfest Weekend Challenge: Build for a Friend.
+
 ## ✨ Features
 
 - Personalized bedtime stories
@@ -18,6 +20,9 @@ DreamTales is a personalized AI bedtime-story companion that creates gentle, ima
 4. ElevenLabs converts the story into natural-sounding narration.
 5. Render hosts the application.
 
+🌐 LIVE DEMO
+[text](https://bedtime-ai.onrender.com/)
+
 ## 🛠️ Tech Stack
 
 - **Gemma** — Story generation
@@ -26,8 +31,26 @@ DreamTales is a personalized AI bedtime-story companion that creates gentle, ima
 
 ## 🚀 Run Locally
 
-```bash
-git clone <your-repository-url>
+1. Clone the repository
+git clone YOUR_GITHUB_REPO_URL
 cd DreamTales
+2. Create a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
+On Windows:
+
+.venv\Scripts\activate
+3. Install dependencies
 pip install -r requirements.txt
+4. Add environment variables
+
+Create a .env file:
+
+ELEVENLABS_API_KEY=your_api_key_here
+GEMMA_MODEL=google/gemma-3-1b-it
+
+Never commit your .env file.
+
+5. Run the app
+streamlit run app.py
