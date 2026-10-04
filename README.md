@@ -21,7 +21,7 @@ Built for the Hacktoberfest Weekend Challenge: Build for a Friend.
 5. Render hosts the application.
 
 🌐 LIVE DEMO
-[text](https://bedtime-ai.onrender.com/)
+  [Try DreamTales Live](https://bedtime-ai.onrender.com/)
 
 ## 🛠️ Tech Stack
 
