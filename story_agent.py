@@ -1,8 +1,8 @@
 import os
 from urllib import response
 
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+#import torch
+#from transformers import AutoTokenizer, AutoModelForCausalLM
 
 
     # You can change this later without changing the rest of the app.
