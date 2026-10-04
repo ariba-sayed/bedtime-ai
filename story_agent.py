@@ -108,12 +108,12 @@ No HTML, Markdown, XML, code fences, or formatting tags.
     #     prompt,
     #     return_tensors="pt"
     # )
-    # if length == "short":
-    #     max_new_tokens = 400
-    # elif length == "medium":
-    #     max_new_tokens = 800
-    # else:  # long
-    #     max_new_tokens = 1000
+    if length == "short":
+        max_new_tokens = 400
+    elif length == "medium":
+        max_new_tokens = 800
+    else:  # long
+        max_new_tokens = 1000
         
     # with torch.no_grad():
     #     outputs = model.generate(
